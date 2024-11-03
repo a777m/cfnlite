@@ -1,0 +1,7 @@
+isort
+mypy
+pycodestyle
+pylint
+pytest
+ruamel.yaml
+troposphere
