@@ -1,0 +1,25 @@
+[MAIN]
+persistent = no
+load-plugins = pylint.extensions.docparams
+
+[MESSAGES CONTROL]
+disable =
+    # checkers
+    design,
+    # messages
+    duplicate-code,
+    invalid-name,
+    locally-disabled,
+    logging-fstring-interpolation,
+enable = useless-suppression
+
+[REPORTS]
+reports = no
+score = no
+output-format = colorized
+
+[TYPECHECK]
+ignored-classes = pytest
+
+[FORMAT]
+max-line-length = 80
