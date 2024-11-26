@@ -1,0 +1,41 @@
+# name: cfnLitePolicyExample
+# resources:
+#   policy:
+#     policyName: "This is a test policy from outside"
+#     Statement:
+#       - Action: "cloudwatch:*"
+#       - Action: "lakeformation:*"
+#       - Action: "sns:*"
+#       - Effect: "Deny"
+#         Action:
+#           - "states:*"
+#         Resources: "dynamodb:*"
+
+Resources:
+  cfnLitePolicyExamplePOLICY:
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action:
+              - cloudwatch:*
+            Effect: Allow
+            Resources:
+              - '*'
+          - Action:
+              - lakeformation:*
+            Effect: Allow
+            Resources:
+              - '*'
+          - Action:
+              - sns:*
+            Effect: Allow
+            Resources:
+              - '*'
+          - Action:
+              - states:*
+            Effect: Deny
+            Resources:
+              - dynamodb:*
+        Version: '2012-10-17'
+      PolicyName: This is a test policy from outside
+    Type: AWS::IAM::Policy

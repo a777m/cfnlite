@@ -1,0 +1,40 @@
+# name: cfnLiteRefExample
+# resources:
+#   ec2:
+#     instanceType: t2.micro
+#     securityGroups: ref securitygroups
+#   securitygroups:
+#     GroupDescription: Handle inbound and outbound traffic
+#     securitygroupIngress: [http]
+#     securitygroupEgress: [http]
+
+Resources:
+  cfnLiteRefExampleEC2:
+    Properties:
+      ImageId: ami-0b45ae66668865cd6
+      InstanceType: t2.micro
+      SecurityGroups:
+        - !Ref 'cfnLiteRefExampleSECURITYGROUPS'
+    Type: AWS::EC2::Instance
+  cfnLiteRefExampleSECURITYGROUPS:
+    Properties:
+      GroupDescription: Handle inbound and outbound traffic
+      SecurityGroupEgress:
+        - Properties:
+            CidrIp: '0.0.0.0/0'
+            Description: Outbound HTTP traffic
+            FromPort: 80
+            GroupId: !GetAtt 'cfnLiteRefExampleSECURITYGROUPS.GroupId'
+            IpProtocol: tcp
+            ToPort: 80
+          Type: AWS::EC2::SecurityGroupEgress
+      SecurityGroupIngress:
+        - Properties:
+            CidrIp: '0.0.0.0/0'
+            Description: Inbound HTTP traffic
+            FromPort: 80
+            GroupId: !GetAtt 'cfnLiteRefExampleSECURITYGROUPS.GroupId'
+            IpProtocol: tcp
+            ToPort: 80
+          Type: AWS::EC2::SecurityGroupIngress
+    Type: AWS::EC2::SecurityGroup

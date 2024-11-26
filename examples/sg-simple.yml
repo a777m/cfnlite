@@ -1,0 +1,30 @@
+# name: cfnLiteSGExample
+# resources:
+#   securitygroups:
+#     GroupDescription: Handle inbound and outbound traffic
+#     securitygroupIngress: [http]
+#     securitygroupEgress: [http]
+
+Resources:
+  cfnLiteSGExampleSECURITYGROUPS:
+    Properties:
+      GroupDescription: Handle inbound and outbound traffic
+      SecurityGroupEgress:
+        - Properties:
+            CidrIp: '0.0.0.0/0'
+            Description: Outbound HTTP traffic
+            FromPort: 80
+            GroupId: !GetAtt 'cfnLiteSGExampleSECURITYGROUPS.GroupId'
+            IpProtocol: tcp
+            ToPort: 80
+          Type: AWS::EC2::SecurityGroupEgress
+      SecurityGroupIngress:
+        - Properties:
+            CidrIp: '0.0.0.0/0'
+            Description: Inbound HTTP traffic
+            FromPort: 80
+            GroupId: !GetAtt 'cfnLiteSGExampleSECURITYGROUPS.GroupId'
+            IpProtocol: tcp
+            ToPort: 80
+          Type: AWS::EC2::SecurityGroupIngress
+    Type: AWS::EC2::SecurityGroup
