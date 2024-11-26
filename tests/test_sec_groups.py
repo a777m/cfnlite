@@ -264,11 +264,15 @@ def test_sg_build__pass_all_possible_properties():
     sg["resources"]["securitygroups"]["groupName"] = "This-is-a-gp-name"
     sg["resources"]["securitygroups"]["vpcId"] = "id-vpc1234"
 
+    # add a resource attribute value
+    sg["resources"]["securitygroups"]["dependson"] = "test-depends-on"
+
     cfnlite.securitygroups.build(
         "testSGs", callbacks, sg["resources"]["securitygroups"])
 
     expected = {
         "testSGs": {
+            "DependsOn": "test-depends-on",
             "Properties": {
                 "GroupDescription": "Handle inbound and outbound traffic",
                 "GroupName": "This-is-a-gp-name",
