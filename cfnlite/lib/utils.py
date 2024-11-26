@@ -1,4 +1,8 @@
 """cfnlite utilities."""
+from typing import Any, TypeVar
+
+# ensure search keys match the hashed key in dicts
+KeyType = TypeVar('KeyType')
 
 # These are default aws resource attributes, they site outside resource props
 # but can be used as props on any given resource. We need to check these as
@@ -79,3 +83,63 @@ def property_validator(
 
     backtrack(property.lower(), memo)
     return matches[::-1]
+
+
+def nested_find(mapping: dict[KeyType, Any], search_key: KeyType) -> Any | None:
+    """Recursively search for a given key in a nested json type object.
+
+    :param dict mapping: the dict to search
+    :param KeyType search_key: the key to search for
+    :returns: The value associated with the key, if found, else None
+    :rtype: Any | None
+    """
+    if search_key in mapping:
+        return mapping[search_key]
+
+    for value in mapping.values():
+
+        if isinstance(value, dict):
+            return nested_find(value, search_key)
+
+        if isinstance(value, list) and len(value) > 0:
+            for item in value:
+                if isinstance(item, dict):
+                    # we want to look through all the possibilities to find
+                    # our key
+                    result: Any = nested_find(item, search_key)
+
+                    if result:
+                        return result
+
+    return None
+
+
+def nested_update(
+    mapping: dict[KeyType, Any],
+    update_key: KeyType,
+    update_value: Any,
+) -> dict[KeyType, Any]:
+    """Deep update of a nested dict e.g. JSON.
+
+    :param dict mapping: The dict to update
+    :param KeyType update_key: The key to update
+    :param Any update_value: The new value for the key
+
+    :returns: The updated dict
+    :rtype: dict[KeyType, Any]
+    """
+    if update_key in mapping:
+        mapping[update_key] = update_value
+        return mapping
+
+    for _, value in mapping.items():
+
+        if isinstance(value, dict):
+            nested_update(value, update_key, update_value)
+
+        if isinstance(value, list) and len(value) > 0:
+            # this will update all matching values in any dict in the list
+            for item in value:
+                if isinstance(item, dict):
+                    nested_update(item, update_key, update_value)
+    return mapping

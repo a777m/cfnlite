@@ -185,11 +185,9 @@ def _validate_params(
     validated_param: str = "".join(cleaned_property)
 
     if validated_param in EXPECTS_LIST and isinstance(value, str):
-        # we already have the rule properties in the defaults so we can append
-        props[validated_param].append(value)
+        value = [value]
 
-    else:
-        props[validated_param] = value
+    utils.nested_update(props, validated_param, value)
 
     return validated_param
 
@@ -226,14 +224,17 @@ def build(
         cleaned_property_name = _validate_params(key, value, sgs)
 
         if cleaned_property_name in EXPECTS_LIST:
-            sgs[cleaned_property_name] = rules(
+            in_out_rules = rules(
                 sg_name=name,
                 prop_name=cleaned_property_name,
                 # the reason we use hashed value rather than the incoming value
                 # is because _validate_params essentially 'cleans' up the value
                 # by making sure its in a list if it comes in as a string, this
                 # will usually be the case for a single rule
-                protocols=sgs[cleaned_property_name])
+                protocols=utils.nested_find(sgs, cleaned_property_name))
+
+            # update sgs dict
+            utils.nested_update(sgs, cleaned_property_name, in_out_rules)
 
         resource_tracker.add(cleaned_property_name.lower())
 
