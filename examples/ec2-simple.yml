@@ -1,0 +1,14 @@
+# name: cfnLiteEc2Example
+# resources:
+#   ec2:
+#     securityGroups:
+#       - default
+
+Resources:
+  cfnLiteEc2ExampleEC2:
+    Properties:
+      ImageId: ami-0b45ae66668865cd6
+      InstanceType: t2.micro
+      SecurityGroups:
+        - default
+    Type: AWS::EC2::Instance

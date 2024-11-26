@@ -1,0 +1,25 @@
+# name: cfnLiteRoleExample
+# resources:
+#   role:
+#     AssumeRolePolicyDocument:
+#       Principal:
+#         service: "ec2.amazonaws.com"
+#       Action:
+#         - "sts:AssumeRole"
+
+Resources:
+  cfnLiteRoleExampleROLE:
+    Properties:
+      AssumeRolePolicyDocument:
+        PolicyDocument:
+          Statement:
+            - Action:
+                - sts:AssumeRole
+              Effect: Allow
+              Principal:
+                service: ec2.amazonaws.com
+              Resources:
+                - '*'
+          Version: '2012-10-17'
+      RoleName: TestRole
+    Type: AWS::IAM::Role
