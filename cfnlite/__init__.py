@@ -1,3 +1,3 @@
 """CFNLite Core."""
 
-from . import ec2, role, securitygroups
+from . import ec2, policy, role, securitygroups
