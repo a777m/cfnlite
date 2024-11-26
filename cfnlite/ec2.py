@@ -146,14 +146,19 @@ def resolve_refs(
         passed down to the resource generator
     :param Callable callback: callback to help resolve references
     """
-    if prop_name in EXPECTS_LIST:
-        props[prop_name] = _check_list_for_refs(props[prop_name], callback)
+    # get the value associated with the property name
+    value: Any = utils.nested_find(props, prop_name)
 
-    elif (
-        isinstance(props[prop_name], str)
-        and props[prop_name].strip().startswith("ref")
-    ):
-        props[prop_name] = _handle_refs(props[prop_name], callback)
+    if not value:
+        raise ValueError(f"Unable to find key: {prop_name}")
+
+    if prop_name in EXPECTS_LIST:
+        handled_refs = _check_list_for_refs(value, callback)
+        utils.nested_update(props, prop_name, handled_refs)
+
+    elif (isinstance(value, str) and value.strip().startswith("ref")):
+        handled_refs = _handle_refs(value, callback)
+        utils.nested_update(props, prop_name, handled_refs)
 
 
 def _validate_props(
@@ -181,10 +186,9 @@ def _validate_props(
     validated_param: str = "".join(cleaned_param)
 
     if validated_param in EXPECTS_LIST and isinstance(value, str):
-        props[validated_param] = [value]
+        value = [value]
 
-    else:
-        props[validated_param] = value
+    utils.nested_update(props, validated_param, value)
 
     return validated_param
 
