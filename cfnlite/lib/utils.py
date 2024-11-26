@@ -13,6 +13,18 @@ RESOURCE_ATTR: list[str] = [
 ]
 
 
+def resource_attributes() -> dict[str, Any]:
+    """A dict containing aws resource attributes with defaults."""
+    return {
+        "CreationPolicy": {},
+        "DeletionPolicy": "Delete",
+        "DependsOn": [],
+        "MetaData": {},
+        "UpdatePolicy": {},
+        "UpdateReplacePolicy": "Delete",
+    }
+
+
 def property_validator(
     property: str,  # pylint: disable=redefined-builtin
     choices: list[str],
@@ -143,3 +155,26 @@ def nested_update(
                 if isinstance(item, dict):
                     nested_update(item, update_key, update_value)
     return mapping
+
+
+def clean(
+    mapping: dict[KeyType, Any],
+    keep_set: set[str],
+) -> dict[KeyType, Any]:
+    """Clean mapping.
+
+    Remove any keys in the mapping that are not in the keep_set.
+
+    :param dict mapping: The object to clean
+    :param set keep_set: field to keep
+    :returns: a new object containing fields to keep
+    :rtype: dict
+    """
+    new_mapping: dict[KeyType, Any] = {}
+    for key, value in mapping.items():
+        if key.lower() not in keep_set:
+            continue
+
+        new_mapping[key] = value
+
+    return new_mapping

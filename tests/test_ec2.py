@@ -276,3 +276,41 @@ def test_ec2_build__from_raw_e2e_with_ref():
     }
 
     assert template.to_dict() == expected
+
+
+@pytest.mark.parametrize("key,value", [
+    ("AdditionalInfo", "test-additional-info"),
+    ("Affinity", "host"),
+    ("AvailabilityZone", "eu-zone-1"),
+    ("PrivateIpAddress", "127.0.0.1"),
+    ("SubnetId", "some-subnet-id"),
+])
+def test_ec2_build__pass_possible_values(key, value):
+    template = troposphere.Template()
+    callbacks = mock_callbacks(template)
+    ec2 = _ec2()
+
+    # add value in lower case to ensure its proper parsed
+    ec2["resources"]["ec2"][key.lower()] = value
+    # add a resource attribute value
+    ec2["resources"]["ec2"]["dependson"] = "test-depends-on"
+
+    # test starts here
+    cfnlite.ec2.build("testEC2", callbacks, ec2["resources"]["ec2"])
+
+    expected = {
+        "Resources": {
+            "testEC2": {
+                "DependsOn": "test-depends-on",
+                "Properties": {
+                    "ImageId": "ami-0b45ae66668865cd6",
+                    "InstanceType": "t2.micro",
+                    "SecurityGroups": ["default"],
+                    key: value,
+                },
+                "Type": "AWS::EC2::Instance",
+            }
+        }
+    }
+
+    assert template.to_dict() == expected

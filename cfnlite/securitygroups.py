@@ -76,6 +76,15 @@ PORT_MAP: dict[str, int] = {
 }
 
 
+# defaults are lower case as thats makes comparisions consistent
+# i.e. str.lower() can be used to compare strings
+SG_DEFAULTS: set[str] = {
+    "groupdescription",
+    "securitygroupegress",
+    "securitygroupingress",
+}
+
+
 def _security_group_rule_defaults(
     protocol: str = "tcp",
     from_port: int = 80,
@@ -106,11 +115,16 @@ def _security_group_defaults() -> SecurityGroup:
     :returns: A security groups object with some defaults
     :rtype: SecurityGroup
     """
-    return {
+    defaults: SecurityGroup = {
         "GroupDescription": "",
+        "GroupName": "default-group-name",
         "SecurityGroupEgress": [],
         "SecurityGroupIngress": [],
+        "VpcId": "",
     }
+
+    defaults.update(utils.resource_attributes())
+    return defaults
 
 
 def rules(
@@ -238,7 +252,9 @@ def build(
 
         resource_tracker.add(cleaned_property_name.lower())
 
-    new_sg = troposphere.ec2.SecurityGroup(name, **sgs)
+    cleaned_sgs: dict[str, Any] = utils.clean(
+        sgs, resource_tracker.union(SG_DEFAULTS))
+    new_sg = troposphere.ec2.SecurityGroup(name, **cleaned_sgs)
 
     # add ec2 to template
     callbacks["add_resource"](new_sg)

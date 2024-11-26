@@ -76,6 +76,9 @@ LANG: list[str] = [
 ]
 
 
+EC2_DEFAULTS: set[str] = {"imageid", "instancetype", "securitygroups"}
+
+
 def _default_ec2_params() -> EC2:
     """EC2 parameters we sensible defaults.
 
@@ -84,11 +87,34 @@ def _default_ec2_params() -> EC2:
         give users the option of skipping them in the cfnlite file.
     :rtype: EC2
     """
-    return {
+    defaults: EC2 = {
+        "AdditionalInfo": "",
+        "Affinity": "",
+        "AvailabilityZone": "",
+        "BlockDeviceMappings": [],
+        "DisableApiTermination": False,
+        "EbsOptimized": False,
+        "HostId": "",
+        "HostResourceGroupArn": "",
+        "IamInstanceProfile": "",
         "ImageId": "ami-0b45ae66668865cd6",
+        "InstanceInitiatedShutdownBehavior": "",
         "InstanceType": "t2.micro",
-        "SecurityGroups": ["default"]
+        "KernelId": "",
+        "KeyName": "",
+        "Monitoring": False,
+        "NetworkInterfaces": [],
+        "PlacementGroupName": "",
+        "PrivateIpAddress": "",
+        "SecurityGroupIds": [],
+        "SecurityGroups": ["default"],
+        "SubnetId": "",
+        "Tenancy": "",
+        "Volumes": [],
     }
+
+    defaults.update(utils.resource_attributes())
+    return defaults
 
 
 def _handle_refs(
@@ -228,7 +254,10 @@ def build(
 
         resource_tracker.add(key.lower())
 
-    new_ec2 = troposphere.ec2.Instance(name, **ec2)
+    # remove any fields that the user did not define but always keep defaults
+    cleaned_ec2 = utils.clean(
+        ec2, resource_tracker.union(EC2_DEFAULTS))
+    new_ec2 = troposphere.ec2.Instance(name, **cleaned_ec2)
 
     # add ec2 to template
     callbacks["add_resource"](new_ec2)
