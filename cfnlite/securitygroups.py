@@ -2,7 +2,7 @@
 
 from typing import Any, Callable, TypedDict, get_type_hints
 
-from troposphere import GetAtt
+from troposphere import GetAtt, constants
 import troposphere.ec2
 
 from cfnlite.lib import utils
@@ -69,10 +69,17 @@ LANG: list[str] = [
 # map standard network protocols to their ports
 # NOTE: ICMP is weird so just ignore it
 PORT_MAP: dict[str, int] = {
-    "http": 80,
-    "https": 443,
     "icmp": 0,
-    "ssh": 22,
+    "mysql": 3306,
+    "http": constants.HTTP_PORT,
+    "https": constants.HTTPS_PORT,
+    "memcached": constants.MEMCACHED_PORT,
+    "mongo": constants.MONGODB_PORT,
+    "ntp": constants.NTP_PORT,
+    "psql": constants.POSTGRESQL_PORT,
+    "redis": constants.REDIS_PORT,
+    "smtp": constants.SMTP_PORT_25,
+    "ssh": constants.SSH_PORT,
 }
 
 
