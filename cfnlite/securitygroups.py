@@ -1,6 +1,6 @@
 """Generate Security Groups from CNFLite."""
 
-from typing import Any, Callable, TypedDict
+from typing import Any, Callable, TypedDict, get_type_hints
 
 from troposphere import GetAtt
 import troposphere.ec2
@@ -260,3 +260,12 @@ def build(
     callbacks["add_resource"](new_sg)
     # add ec2 to symbol table
     callbacks["add_symbol"]("securitygroups", new_sg)
+
+
+def explain():
+    """List the current supported Role properties."""
+    # we'll import pprint here as its not that heavily used
+    import pprint  # pylint: disable=import-outside-toplevel
+
+    # we can use the typed dict to get this data
+    pprint.pprint(get_type_hints(SecurityGroup))
