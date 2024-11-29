@@ -33,6 +33,10 @@ class PolicyDocument(TypedDict, total=False):
     Version: str
 
 
+# details: (
+#     https://docs.aws.amazon.com/ \
+#     AWSCloudFormation/latest/UserGuide/aws-properties-iam-role-policy.html
+# )
 class Policy(TypedDict, total=False):
     """Policy properties."""
 
@@ -40,6 +44,10 @@ class Policy(TypedDict, total=False):
     PolicyName: str
 
 
+# details: (
+#     https://docs.aws.amazon.com/ \
+#     AWSCloudFormation/latest/UserGuide/aws-resource-iam-role.html
+# )
 class Role(TypedDict, total=False):
     """Role properties."""
 

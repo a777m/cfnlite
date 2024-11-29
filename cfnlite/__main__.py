@@ -41,6 +41,7 @@ DISPATCH: dict[str, Callable] = {
     "policy": cfnlite.policy,
     "role": cfnlite.role,
     "securitygroups": cfnlite.securitygroups,
+    "vpc": cfnlite.vpc,
 }
 
 # global CloudFormation template, contains what will eventually be generated
@@ -200,18 +201,16 @@ def main(args: argparse.Namespace) -> int:
         raise ValueError(f"File at path not found: {args.file}")
 
     if args.explain:
-        try:
-            print(
-                DISPATCH.keys()
-                if args.explain.lower() == "resources"
-                else getattr(DISPATCH[args.explain.lower()], "explain")()
-            )
+        if args.explain.lower() == "resources":
+            DISPATCH.keys()
 
-            return 0
+        elif args.explain.lower() in DISPATCH:
+            DISPATCH[args.explain.lower()].explain()
 
-        except AttributeError as error:
-            raise ValueError(
-                f"{args.explain} is not a valid resource type.") from error
+        else:
+            raise ValueError(f"'{args.explain}' is not a valid resource type.")
+
+        return 0
 
     try:
         parse(args.file)
@@ -263,4 +262,12 @@ def cli() -> argparse.Namespace:
 
 if __name__ == "__main__":
     cli_incoming = cli()
-    sys.exit(main(cli_incoming))
+    build_exit = 0
+
+    try:
+        main(cli_incoming)
+    except Exception as error:
+        print(str(error))
+        build_exit = 1
+
+    sys.exit(build_exit)
