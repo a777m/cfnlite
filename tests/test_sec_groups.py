@@ -377,3 +377,44 @@ def test_sg_build__tag_support():
     }
 
     assert template.to_dict()["Resources"] == expected
+
+
+def test_sg_build__reference_support():
+    # setup
+    template = troposphere.Template()
+    callbacks = mock_callbacks(template)
+    sg = _sg()
+
+    # simplify the output
+    sg["resources"]["securitygroups"]["securitygroupingress"] = []
+    sg["resources"]["securitygroups"]["securitygroupegress"] = []
+    sg["resources"]["securitygroups"]["vpcId"] = "ref vpc"
+
+    # create vpc resource and add it to symbol table
+    vpc = troposphere.ec2.VPC("testVPC", CidrBlock="10.0.0.0/16")
+    callbacks["add_resource"](vpc)
+    callbacks["add_symbol"]("vpc", vpc)
+
+    # test starts here
+    cfnlite.securitygroups.build(
+        "testSGs", callbacks, sg["resources"]["securitygroups"])
+
+    expected = {
+        "testSGs": {
+            "Properties": {
+                "GroupDescription": "Handle inbound and outbound traffic",
+                "SecurityGroupEgress": [],
+                "SecurityGroupIngress": [],
+                "VpcId": {"Ref": "testVPC"},
+            },
+            "Type": "AWS::EC2::SecurityGroup",
+        },
+        "testVPC": {
+            "Properties": {
+                "CidrBlock": "10.0.0.0/16",
+            },
+            "Type": "AWS::EC2::VPC",
+        },
+    }
+
+    assert template.to_dict()["Resources"] == expected

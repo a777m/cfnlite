@@ -378,3 +378,57 @@ def test_role_build__tag_support():
     }
 
     assert template.to_dict() == expected
+
+
+def test_role_build__reference():
+    # set up
+    template = troposphere.Template()
+    callbacks = mock_callbacks(template)
+    role = _role()
+
+    # create security group reference
+    sg = troposphere.ec2.SecurityGroup(
+        "TestSecurityGroupsName", GroupDescription="aFakeGroupID")
+
+    # add to template and symbol table
+    callbacks["add_resource"](sg)
+    callbacks["add_symbol"]("securitygroups", sg)
+
+    # update role to depend on security group
+    role["resources"]["role"]["dependsOn"] = "ref securitygroups"
+
+    cfnlite.role.build("testRole", callbacks, role["resources"]["role"])
+
+    expected = {
+        "Resources": {
+            "TestSecurityGroupsName": {
+                "Properties": {
+                    "GroupDescription": "aFakeGroupID",
+                },
+                "Type": "AWS::EC2::SecurityGroup",
+            },
+            "testRole": {
+                "DependsOn": {"Ref": "TestSecurityGroupsName"},
+                "Properties": {
+                    "AssumeRolePolicyDocument": {
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Action": ["sts:AssumeRole"],
+                                    "Effect": "Allow",
+                                    "Principal": {
+                                        "service": "ec2.amazonaws.com"
+                                    },
+                                    "Resources": ["*"],
+                            }],
+                        },
+                    },
+                    "RoleName": "TestRole"
+                },
+                "Type": "AWS::IAM::Role"
+            },
+        },
+    }
+
+    assert template.to_dict() == expected

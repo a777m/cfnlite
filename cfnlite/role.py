@@ -277,6 +277,11 @@ def build(
             formatted_tags = tags.add_tags(
                 name, value, callbacks["get_symbol"])
             utils.nested_update(role, "Tags", formatted_tags)
+
+        # handle any refs
+        validators.resolve_refs(
+            cleaned_property_name, role, callbacks["get_symbol"])
+
         resource_tracker.add(cleaned_property_name.lower())
 
     # remove any fields that the user did not define but always keep defaults
