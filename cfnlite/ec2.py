@@ -156,7 +156,7 @@ def build(
             raise ValueError(msg) from err
         # handle any refs
         validators.resolve_refs(
-            cleaned_property_name, ec2, EXPECTS_LIST, callbacks["get_symbol"])
+            cleaned_property_name, ec2, callbacks["get_symbol"])
 
         resource_tracker.add(key.lower())
 

@@ -57,7 +57,6 @@ def _check_list_for_refs(
 def resolve_refs(
     prop_name: str,
     props: T,
-    expects_list: set[str],
     callback: Callable[[str], Any],
 ) -> None:
     """Resolve any references the property needs.
@@ -73,7 +72,7 @@ def resolve_refs(
     if value is None:
         raise ValueError(f"Unable to find key: {prop_name}")
 
-    if prop_name in expects_list:
+    if isinstance(value, list):
         handled_refs = _check_list_for_refs(value, callback)
         utils.nested_update(props, prop_name, handled_refs)
 
