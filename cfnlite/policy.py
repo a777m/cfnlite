@@ -34,6 +34,10 @@ class PolicyDocument(TypedDict, total=False):
     Version: str
 
 
+# details: (
+#     https://docs.aws.amazon.com/ \
+#     AWSCloudFormation/latest/UserGuide/aws-resource-iam-policy.html
+# )
 class Policy(TypedDict, total=False):
     """Policy properties."""
 
