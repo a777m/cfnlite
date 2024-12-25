@@ -249,6 +249,10 @@ def build(
                 name, value, callbacks["get_symbol"])
             utils.nested_update(sgs, "Tags", formatted_tags)
 
+        # handle any refs
+        validators.resolve_refs(
+            cleaned_property_name, sgs, callbacks["get_symbol"])
+
         resource_tracker.add(cleaned_property_name.lower())
 
     cleaned_sgs: dict[str, Any] = utils.clean(
