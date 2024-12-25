@@ -212,7 +212,7 @@ def build(
 
         # handle any refs
         validators.resolve_refs(
-            cleaned_property_name, policy, EXPECTS_LIST, callbacks["get_symbol"])
+            cleaned_property_name, policy, callbacks["get_symbol"])
 
         resource_tracker.add(cleaned_property_name.lower())
 
