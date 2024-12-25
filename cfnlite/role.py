@@ -4,7 +4,7 @@ from typing import Any, Callable, TypedDict, TypeVar, get_type_hints
 
 import troposphere.iam
 
-from cfnlite.lib import utils
+from cfnlite.lib import utils, validators
 
 
 # Callbacks type, just to sure things up for people with cool IDEs
@@ -152,36 +152,6 @@ def _role_defaults():
     return defaults
 
 
-def _validate_props(
-    key: KeyType,
-    value: str | list[str | dict[str, Any]],
-    props: dict[KeyType, Any]
-) -> KeyType:
-    """Validate incoming resource properties.
-
-    :param KeyType key: the property name
-    :param str | list[str | dict[str, Any]] value: the property value(s)
-    :param dict[KeyType, Any] props: object holding final set of correctly
-        formatted props passed down to the resource generator
-
-    :returns: correctly formatted property name
-    :rtype: KeyType
-    :raises ValueError: if key is an invalid EC2 property
-    """
-    cleaned_param = utils.property_validator(key, LANG)
-    if not cleaned_param:
-        raise ValueError(f"'{key}' is an invalid attribute for Roles")
-
-    validated_param = "".join(cleaned_param)
-
-    if validated_param in EXPECTS_LIST and isinstance(value, str):
-        value = [value]
-
-    utils.nested_update(props, validated_param, value)
-
-    return validated_param
-
-
 def _handle_statement(statements: list[dict[str, str]]) -> list[Statement]:
     """Correctly format incoming policy statements.
 
@@ -219,7 +189,8 @@ def _handle_statement(statements: list[dict[str, str]]) -> list[Statement]:
                     f"Offending key: {key}")
             # clean the incoming key and update the default value to
             # incoming one
-            cleaned_prop: str = _validate_props(key, value, default_statement)
+            cleaned_prop: str = validators.validate_props(
+                key, value, default_statement, LANG, EXPECTS_LIST)
 
             resource_tracker.add(cleaned_prop.lower())
 
@@ -275,7 +246,15 @@ def build(
             raise ValueError(
                 f"Each property can only be used once. Offending prop: {key}")
 
-        cleaned_property_name: str = _validate_props(key, value, role)
+        try:
+            # this function returns a generic ValueError, so we want to catch
+            # it here and propagate it with the correct error message.
+            cleaned_property_name: str = validators.validate_props(
+                key, value, role, LANG, EXPECTS_LIST)
+
+        except ValueError as err:
+            msg: str = f"'{key}' is an invalid attribute for Roles"
+            raise ValueError(msg) from err
 
         if cleaned_property_name.lower() == "assumerolepolicydocument":
             assume_policy: Policy = _handle_policy_document(value)

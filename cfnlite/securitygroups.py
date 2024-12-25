@@ -5,7 +5,7 @@ from typing import Any, Callable, TypedDict, get_type_hints
 from troposphere import GetAtt, constants
 import troposphere.ec2
 
-from cfnlite.lib import utils
+from cfnlite.lib import utils, validators
 
 
 # Callbacks type, just to sure things up for people with cool IDEs
@@ -183,36 +183,6 @@ def rules(
     return result
 
 
-def _validate_params(
-    key: str,
-    value: str | list[str],
-    props: SecurityGroup,
-) -> str:
-    """Validate incoming resource properties.
-
-    :param str key: the property name
-    :param str | list[str] value: the property value(s)
-    :param SecurityGroup props: object holding final set of correctly
-        formatted props passed down to the resource generator
-
-    :returns: correctly formatted property name
-    :rtype: str
-    :raises ValueError: if key is an invalid SG property
-    """
-    cleaned_property = utils.property_validator(key, LANG)
-    if not cleaned_property:
-        raise ValueError(f"{key} is not a valid attribute for SecurityGroups")
-
-    validated_param: str = "".join(cleaned_property)
-
-    if validated_param in EXPECTS_LIST and isinstance(value, str):
-        value = [value]
-
-    utils.nested_update(props, validated_param, value)
-
-    return validated_param
-
-
 def build(
     name: str,
     callbacks: CallBacks,
@@ -242,7 +212,15 @@ def build(
             raise ValueError(
                 f"Each property can only be used once. Offending prop: {key}")
 
-        cleaned_property_name = _validate_params(key, value, sgs)
+        try:
+            # this function returns a generic ValueError, so we want to catch
+            # it here and propagate it with the correct error message.
+            cleaned_property_name = validators.validate_props(
+                key, value, sgs, LANG, EXPECTS_LIST)
+
+        except ValueError as err:
+            msg: str = f"{key} is not a valid attribute for SecurityGroups"
+            raise ValueError(msg) from err
 
         if cleaned_property_name in EXPECTS_LIST:
             in_out_rules = rules(
