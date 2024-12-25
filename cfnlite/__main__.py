@@ -105,10 +105,10 @@ def _init_symbol_table(resources: Resources) -> None:
     """
     for resource in resources.keys():
         # check if resource is unsupported
-        if resource not in DISPATCH:
+        if resource.lower() not in DISPATCH:
             raise ValueError(f"{resource} is unsupported to spelt wrong")
 
-        SYMBOL_TABLE[resource] = None
+        SYMBOL_TABLE[resource.lower()] = None
 
 
 def _init_callbacks_table() -> CallBacks:
@@ -178,10 +178,10 @@ def parse(cfnlite_file: pathlib.Path):
             raise ValueError(f"{resource} not supported")
 
         name = f"{doc['name']}{resource.upper()}"
-        DISPATCH[resource].build(
+        DISPATCH[resource.lower()].build(
             name,
             callbacks,
-            doc["resources"][resource.lower()]
+            doc["resources"][resource]
         )
 
 
@@ -200,24 +200,20 @@ def main(args: argparse.Namespace) -> int:
         raise ValueError(f"File at path not found: {args.file}")
 
     if args.explain:
-        try:
-            print(
-                DISPATCH.keys()
-                if args.explain.lower() == "resources"
-                else getattr(DISPATCH[args.explain.lower()], "explain")()
-            )
+        if args.explain.lower() == "resources":
+            DISPATCH.keys()
 
-            return 0
+        elif args.explain.lower() in DISPATCH:
+            DISPATCH[args.explain.lower()].explain()
 
-        except AttributeError as error:
-            raise ValueError(
-                f"{args.explain} is not a valid resource type.") from error
+        else:
+            raise ValueError(f"'{args.explain}' is not a valid resource type.")
 
-    try:
-        parse(args.file)
-    except ValueError as e:
-        print(e)
-        return 1
+        return 0
+
+    # optimistically attempt to parse file, if there are exceptions
+    # they will be handled higher up the stack
+    parse(args.file)
 
     if args.dry_run:
         print(TEMPLATE.to_yaml())
@@ -263,4 +259,12 @@ def cli() -> argparse.Namespace:
 
 if __name__ == "__main__":
     cli_incoming = cli()
-    sys.exit(main(cli_incoming))
+    build_exit = 0
+
+    try:
+        main(cli_incoming)
+    except Exception as error:  # pylint: disable=broad-exception-caught
+        print(str(error))
+        build_exit = 1
+
+    sys.exit(build_exit)
