@@ -2,10 +2,9 @@
 
 from typing import Any, Callable, TypedDict, get_type_hints
 
-from troposphere import Ref
 import troposphere.ec2
 
-from cfnlite.lib import utils
+from cfnlite.lib import utils, validators
 
 
 # Callbacks type, just to sure things up for people with cool IDEs
@@ -117,108 +116,6 @@ def _default_ec2_params() -> EC2:
     return defaults
 
 
-def _handle_refs(
-    prop: str,
-    symbol_callback: Callable[[str], Any],
-) -> troposphere.Ref:
-    """Handle generating a cfn Ref.
-
-    :param str prop: the resource property name to reference
-    :param Callable[[str], Any] symbol_callback: callback function to grab the
-        reference from an external symbol table. The resource name is the
-        index into the symbol table.
-
-    :returns: the reference object
-    :rtype: troposphere.Ref
-    :raises ValueError: if ref keyword is formatted incorrectly
-    """
-    value: list[str] = prop.split()
-
-    if len(value) < 2 or len(value) > 2:
-        raise ValueError(
-            "Keyword 'ref' must be followed by exactly one argument")
-
-    return Ref(symbol_callback(value[1]))
-
-
-def _check_list_for_refs(
-    prop_list: list[str],
-    callback: Callable[[str], Any],
-) -> list[str, troposphere.Ref]:
-    """Check a list of props for any references to other resources.
-
-    :param list[str] prop_list: list of props
-    :param Callable[[str], Any] callback: callback function to handle
-        resolving references.
-    :returns: a list of resolved references (if needed)
-    :rtype: list[str, troposphere.Ref]
-    """
-    for idx, item in enumerate(prop_list):
-        if isinstance(item, str) and item.strip().startswith("ref"):
-            prop_list[idx] = _handle_refs(item, callback)
-
-    return prop_list
-
-
-def resolve_refs(
-    prop_name: str,
-    props: EC2,
-    callback: Callable[[str], Any]
-) -> None:
-    """Resolve any references the property needs.
-
-    :param str prop_name: the property name
-    :param EC2 props: object holding final set of correctly formatted props
-        passed down to the resource generator
-    :param Callable callback: callback to help resolve references
-    """
-    # get the value associated with the property name
-    value: Any = utils.nested_find(props, prop_name)
-
-    if not value:
-        raise ValueError(f"Unable to find key: {prop_name}")
-
-    if prop_name in EXPECTS_LIST:
-        handled_refs = _check_list_for_refs(value, callback)
-        utils.nested_update(props, prop_name, handled_refs)
-
-    elif (isinstance(value, str) and value.strip().startswith("ref")):
-        handled_refs = _handle_refs(value, callback)
-        utils.nested_update(props, prop_name, handled_refs)
-
-
-def _validate_props(
-    key: str,
-    value: str | list[str],
-    props: EC2,
-) -> str:
-    """Validate incoming resource properties.
-
-    :param str key: the property name
-    :param str | list[str] value: the property value(s)
-    :param EC2 props: object holding final set of correctly formatted props
-        passed down to the resource generator
-
-    :returns: correctly formatted property name
-    :rtype: str
-    :raises ValueError: if key is an invalid EC2 property
-    """
-    # This ensures our prop name gets correctly formatted e.g.:
-    # securitygroups -> SecurityGroups
-    cleaned_param: list[str] = utils.property_validator(key, LANG)
-    if not cleaned_param:
-        raise ValueError(f"{key} is an invalid attribute for EC2's.")
-
-    validated_param: str = "".join(cleaned_param)
-
-    if validated_param in EXPECTS_LIST and isinstance(value, str):
-        value = [value]
-
-    utils.nested_update(props, validated_param, value)
-
-    return validated_param
-
-
 def build(
     name: str,
     callbacks: CallBacks,
@@ -248,9 +145,18 @@ def build(
             raise ValueError(
                 f"Each property can only be used once. Offending prop: {key}")
 
-        cleaned_property_name = _validate_props(key, value, ec2)
+        try:
+            # this function returns a generic ValueError, so we want to catch
+            # it here and propagate it with the correct error message.
+            cleaned_property_name = validators.validate_props(
+                key, value, ec2, LANG, EXPECTS_LIST)
+
+        except ValueError as err:
+            msg: str = f"{key} is an invalid attribute for EC2's."
+            raise ValueError(msg) from err
         # handle any refs
-        resolve_refs(cleaned_property_name, ec2, callbacks["get_symbol"])
+        validators.resolve_refs(
+            cleaned_property_name, ec2, EXPECTS_LIST, callbacks["get_symbol"])
 
         resource_tracker.add(key.lower())
 
