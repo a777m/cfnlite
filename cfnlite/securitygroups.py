@@ -5,7 +5,7 @@ from typing import Any, Callable, TypedDict, get_type_hints
 from troposphere import GetAtt, constants
 import troposphere.ec2
 
-from cfnlite.lib import utils, validators
+from cfnlite.lib import tags, utils, validators
 
 
 # Callbacks type, just to sure things up for people with cool IDEs
@@ -28,6 +28,7 @@ class SecurityGroup(TypedDict, total=False):
     GroupName: str
     SecurityGroupEgress: list[troposphere.ec2.SecurityGroupEgress]
     SecurityGroupIngress: list[troposphere.ec2.SecurityGroupIngress]
+    Tags: list[dict[str, str]]
     VpcId: str
 
 
@@ -50,7 +51,11 @@ SGRulesList = list[
 
 
 # Properties that are a list
-EXPECTS_LIST: set[str] = {"SecurityGroupEgress", "SecurityGroupIngress"}
+EXPECTS_LIST: set[str] = {
+    "SecurityGroupEgress",
+    "SecurityGroupIngress",
+    "Tags",
+}
 
 
 # "Lang" is a misnomer here but essentially in order to allow users to not
@@ -62,7 +67,7 @@ EXPECTS_LIST: set[str] = {"SecurityGroupEgress", "SecurityGroupIngress"}
 # any casing combination is allowed.
 LANG: list[str] = [
     "Description", "Egress", "Group", "Id", "Ingress", "Name",
-    "Security", "Vpc",
+    "Security", "Tags", "Vpc",
 ]
 
 
@@ -127,6 +132,7 @@ def _security_group_defaults() -> SecurityGroup:
         "GroupName": "default-group-name",
         "SecurityGroupEgress": [],
         "SecurityGroupIngress": [],
+        "Tags": [],
         "VpcId": "",
     }
 
@@ -222,7 +228,10 @@ def build(
             msg: str = f"{key} is not a valid attribute for SecurityGroups"
             raise ValueError(msg) from err
 
-        if cleaned_property_name in EXPECTS_LIST:
+        if (
+            cleaned_property_name
+            in ("SecurityGroupEgress" "SecurityGroupIngress")
+        ):
             in_out_rules = rules(
                 sg_name=name,
                 prop_name=cleaned_property_name,
@@ -234,6 +243,11 @@ def build(
 
             # update sgs dict
             utils.nested_update(sgs, cleaned_property_name, in_out_rules)
+
+        if cleaned_property_name.lower() == "tags":
+            formatted_tags = tags.add_tags(
+                name, value, callbacks["get_symbol"])
+            utils.nested_update(sgs, "Tags", formatted_tags)
 
         resource_tracker.add(cleaned_property_name.lower())
 

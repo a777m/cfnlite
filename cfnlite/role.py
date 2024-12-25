@@ -4,7 +4,7 @@ from typing import Any, Callable, TypedDict, TypeVar, get_type_hints
 
 import troposphere.iam
 
-from cfnlite.lib import utils, validators
+from cfnlite.lib import tags, utils, validators
 
 
 # Callbacks type, just to sure things up for people with cool IDEs
@@ -59,6 +59,7 @@ class Role(TypedDict, total=False):
     PermissionsBoundary: str
     Policies: list[Policy]
     RoleName: str
+    Tags: list[dict[str, str]]
 
 
 # ensure search/update keys match the hashed key in dicts
@@ -73,6 +74,7 @@ EXPECTS_LIST: set[str] = {
     "Policies",
     "Resources",
     "Statement",
+    "Tags",
     "Users"
 }
 
@@ -88,7 +90,7 @@ LANG: list[str] = [
     "Arns", "Action", "Assume", "Boundary", "Description", "Document",
     "Duration", "Effect", "Groups", "Managed", "Max", "Name", "Path",
     "Permissions", "Policies", "Policy", "Principal", "Resources", "Role",
-    "Roles", "Session", "Sid", "Statement", "Users", "Version",
+    "Roles", "Session", "Sid", "Statement", "Tags", "Users", "Version",
 ]
 
 
@@ -146,6 +148,7 @@ def _role_defaults():
         "PermissionsBoundary": "",
         "Policies": [],
         "RoleName": "TestRole",
+        "Tags": [],
     }
 
     defaults.update(utils.resource_attributes())
@@ -270,6 +273,10 @@ def build(
                 # policy object
                 [troposphere.iam.Policy(**full_policy)])
 
+        if cleaned_property_name.lower() == "tags":
+            formatted_tags = tags.add_tags(
+                name, value, callbacks["get_symbol"])
+            utils.nested_update(role, "Tags", formatted_tags)
         resource_tracker.add(cleaned_property_name.lower())
 
     # remove any fields that the user did not define but always keep defaults

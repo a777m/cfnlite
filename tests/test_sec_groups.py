@@ -340,3 +340,40 @@ def test_sg_build__pass_prop_in_lang_but_invalid_property():
 
     cfnlite.securitygroups.build(
         "testSGs", callbacks, sg["resources"]["securitygroups"])
+
+
+def test_sg_build__tag_support():
+    # setup
+    template = troposphere.Template()
+    callbacks = mock_callbacks(template)
+    sg = _sg()
+
+    # simplify the output
+    sg["resources"]["securitygroups"]["securitygroupingress"] = []
+    sg["resources"]["securitygroups"]["securitygroupegress"] = []
+
+    # add tags
+    tags = {"tag1": "value1", "tag2": "value2"}
+    sg["resources"]["securitygroups"]["tags"] = tags
+
+    # test starts here
+    cfnlite.securitygroups.build(
+        "testSGs", callbacks, sg["resources"]["securitygroups"])
+
+    expected = {
+        "testSGs": {
+            "Properties": {
+                "GroupDescription": "Handle inbound and outbound traffic",
+                "SecurityGroupEgress": [],
+                "SecurityGroupIngress": [],
+                "Tags": [
+                    {"Key": "default-cfnlite-resource-name", "Value": "testSGs"},
+                    {"Key": "tag1", "Value": "value1"},
+                    {"Key": "tag2", "Value": "value2"},
+                ],
+            },
+            "Type": "AWS::EC2::SecurityGroup",
+        },
+    }
+
+    assert template.to_dict()["Resources"] == expected

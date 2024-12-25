@@ -334,3 +334,47 @@ def test_role_build__bad_prop(bad_prop):
         cfnlite.role.build("testRole", callbacks, role["resources"]["role"])
 
     assert str(e.value) == f"'{bad_prop}' is an invalid attribute for Roles"
+
+
+def test_role_build__tag_support():
+    # set up
+    template = troposphere.Template()
+    callbacks = mock_callbacks(template)
+    role = _role()
+
+    tags = {"tag1": "value1", "tag2": "value2"}
+    role["resources"]["role"]["tags"] = tags
+
+    cfnlite.role.build("testRole", callbacks, role["resources"]["role"])
+
+    expected = {
+        "Resources": {
+            "testRole": {
+                "Properties": {
+                    "AssumeRolePolicyDocument": {
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Action": ["sts:AssumeRole"],
+                                    "Effect": "Allow",
+                                    "Principal": {
+                                        "service": "ec2.amazonaws.com"
+                                    },
+                                    "Resources": ["*"],
+                            }],
+                        },
+                    },
+                    "RoleName": "TestRole",
+                    "Tags": [
+                        {"Key": "default-cfnlite-resource-name", "Value": "testRole"},
+                        {"Key": "tag1", "Value": "value1"},
+                        {"Key": "tag2", "Value": "value2"},
+                    ],
+                },
+                "Type": "AWS::IAM::Role"
+            },
+        },
+    }
+
+    assert template.to_dict() == expected
