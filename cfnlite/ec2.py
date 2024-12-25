@@ -4,7 +4,7 @@ from typing import Any, Callable, TypedDict, get_type_hints
 
 import troposphere.ec2
 
-from cfnlite.lib import utils, validators
+from cfnlite.lib import tags, utils, validators
 
 
 # Callbacks type, just to sure things up for people with cool IDEs
@@ -45,6 +45,7 @@ class EC2(TypedDict, total=False):
     SecurityGroups: list[str]
     SubnetId: str
     Tenancy: str
+    Tags: list[dict[str, str]]
     Volumes: list[Any]
 
 
@@ -54,6 +55,7 @@ EXPECTS_LIST: set[str] = {
     "NetworkInterfaces",
     "SecurityGroupIds",
     "SecurityGroups",
+    "Tags",
     "Volumes",
 }
 
@@ -71,7 +73,7 @@ LANG: list[str] = [
     "Iam", "Id", "Ids", "Image", "Info", "Initiated", "Instance", "Interfaces",
     "Ip", "Kernel", "Key", "Mappings", "Monitoring", "Name", "Network",
     "Optimized", "Placement", "Private", "Profile", "Resource", "Security",
-    "Shutdown", "Subnet", "Tenancy", "Termination", "Type", "Volumes", "Zone"
+    "Shutdown", "Subnet", "Tenancy", "Termination", "Tags", "Type", "Volumes", "Zone"
 ]
 
 
@@ -109,6 +111,7 @@ def _default_ec2_params() -> EC2:
         "SecurityGroups": ["default"],
         "SubnetId": "",
         "Tenancy": "",
+        "Tags": [],
         "Volumes": [],
     }
 
@@ -154,6 +157,12 @@ def build(
         except ValueError as err:
             msg: str = f"{key} is an invalid attribute for EC2's."
             raise ValueError(msg) from err
+
+        if cleaned_property_name.lower() == "tags":
+            formatted_tags = tags.add_tags(
+                name, value, callbacks["get_symbol"])
+            utils.nested_update(ec2, "Tags", formatted_tags)
+
         # handle any refs
         validators.resolve_refs(
             cleaned_property_name, ec2, callbacks["get_symbol"])

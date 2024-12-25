@@ -69,7 +69,7 @@ cnflite supports python 3.10+
 - ~~Generate CNF with arbitrary kwargs~~
 - ~~Remove the need for property PascalCase~~
 - ~~Add 'ref' keyword and resolve resource dependencies~~
-- Add support for tagging
+- ~~Add support for tagging~~
 - Add loops i.e. create multiple types of the same resource with different
 properties
 - Add support for other CFN template sections i.e. parameters, outputs etc

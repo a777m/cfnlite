@@ -314,3 +314,36 @@ def test_ec2_build__pass_possible_values(key, value):
     }
 
     assert template.to_dict() == expected
+
+
+def test_ec2_build__tag_support():
+    # set up
+    template = troposphere.Template()
+    callbacks = mock_callbacks(template)
+    ec2 = _ec2()
+
+    tags = {"tag1": "value1", "tag2": "value2"}
+    ec2["resources"]["ec2"]["tags"] = tags
+
+    # test starts here
+    cfnlite.ec2.build("testEC2", callbacks, ec2["resources"]["ec2"])
+
+    expected = {
+        "Resources": {
+            "testEC2": {
+                "Properties": {
+                    "ImageId": "ami-0b45ae66668865cd6",
+                    "InstanceType": "t2.micro",
+                    "SecurityGroups": ["default"],
+                    "Tags": [
+                        {"Key": "default-cfnlite-resource-name", "Value": "testEC2"},
+                        {"Key": "tag1", "Value": "value1"},
+                        {"Key": "tag2", "Value": "value2"},
+                    ],
+                },
+                "Type": "AWS::EC2::Instance",
+            }
+        }
+    }
+
+    assert template.to_dict() == expected

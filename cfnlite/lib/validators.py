@@ -66,6 +66,10 @@ def resolve_refs(
         passed down to the resource generator
     :param Callable callback: callback to help resolve references
     """
+    # we handle tag references separately
+    if prop_name == "tags":
+        return
+
     # get the value associated with the property name
     value: Any = utils.nested_find(props, prop_name)
 
