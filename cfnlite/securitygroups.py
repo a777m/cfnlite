@@ -58,19 +58,6 @@ EXPECTS_LIST: set[str] = {
 }
 
 
-# "Lang" is a misnomer here but essentially in order to allow users to not
-# need to strictly adhere to the PascalCase required by CNF we need to be able
-# to recreate the correct form for each property. This list holds all the words
-# that are combined together to make up any allowed EC2 property. This is then
-# fed into our "resolver" functionality which spits out the the correct cased
-# property name. As a result, properties must still be spelt correctly, however,
-# any casing combination is allowed.
-LANG: list[str] = [
-    "Description", "Egress", "Group", "Id", "Ingress", "Name",
-    "Security", "Tags", "Vpc",
-]
-
-
 # map standard network protocols to their ports
 # NOTE: ICMP is weird so just ignore it
 PORT_MAP: dict[str, int] = {
@@ -206,6 +193,8 @@ def build(
     # the cfn generator
     sgs = _security_group_defaults()
 
+    lang: list[str] = utils.create_lang(sgs.keys())
+
     # Allow users to overwrite any default value but protect against them
     # naming the same value twice in the cnflite file. This is easily done
     # by naming the same property twice but using different casee i.e.
@@ -222,7 +211,7 @@ def build(
             # this function returns a generic ValueError, so we want to catch
             # it here and propagate it with the correct error message.
             cleaned_property_name = validators.validate_props(
-                key, value, sgs, LANG, EXPECTS_LIST)
+                key, value, sgs, lang, EXPECTS_LIST)
 
         except ValueError as err:
             msg: str = f"{key} is not a valid attribute for SecurityGroups"

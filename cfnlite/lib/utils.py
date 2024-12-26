@@ -178,3 +178,56 @@ def clean(
         new_mapping[key] = value
 
     return new_mapping
+
+
+def create_lang(prop_names: list[str]) -> list[str]:
+    """Create the 'language' for parameter resolution.
+
+    "Language" is a misnomer but essentially in order to allow users to not
+    need to strictly adhere to the PascalCase required by CNF we need to be
+    able to recreate the correct form for each property. The output of this
+    function is a list that holds all the words that can be combined together
+    to make up any allowed property name for each resource.
+
+    Note, each resource has its own language as there is overlap between
+    resource property names but they are combined in resource specific ways.
+
+    The main idea here is to feed a list of all standard property names, in
+    PascalCase, to the function which will then split the words into their
+    constituent parts e.g.
+    SecurityGroupIngress -> ["Security", "Group", "Ingress"].
+
+    The resulting list is then fed into our "resolver" functionality which
+    spits out the the correct cased property name. As a result,
+    properties must still be spelt correctly, however, any casing combination
+    is allowed.
+
+    :param list[str] prop_names: list of the resource property names, as
+        defined by AWS
+    :returns: list containing property name constituents
+    :rtype: list[str]
+    """
+    # ensure we do not have any duplicates
+    lang = set()
+
+    for prop in prop_names:
+        # holds a single word during each iteration
+        word = []
+        for char in prop:
+            # if the word is not a capital, add it to word list and carry on
+            if not 65 <= ord(char) < 91:
+                word.append(char)
+                continue
+
+            if word:
+                # we've found a new word
+                lang.add("".join(word))
+
+            # start new word
+            word = [char]
+
+        # get last word in property name
+        if word:
+            lang.add("".join(word))
+
+    return list(lang)
