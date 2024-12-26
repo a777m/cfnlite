@@ -165,3 +165,15 @@ def test_nested_update__nothing_changes_if_key_not_found():
     updated = utils.nested_update(nested_object(), "IdontExist", "fakeval")
     # make sure nothing changed
     assert updated == nested_object()
+
+
+@pytest.mark.parametrize("props,expected", [
+    (["Tags"], ["Tags"]),
+    (["SecurityGroupIn"], ["Security", "Group", "In"]),
+    (["SecurityGroupIn", "SecurityGroupOut"], ["Security", "Group", "In", "Out"]),
+    (["lowercase"], ["lowercase"]),
+    (["VPC"], ["V", "P", "C"]),
+    ([], []),
+])
+def test_create_lang(props, expected):
+    assert sorted(utils.create_lang(props)) == sorted(expected)

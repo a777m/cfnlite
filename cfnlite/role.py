@@ -78,22 +78,6 @@ EXPECTS_LIST: set[str] = {
     "Users"
 }
 
-
-# "Lang" is a misnomer here but essentially in order to allow users to not
-# need to strictly adhere to the PascalCase required by CNF we need to be able
-# to recreate the correct form for each property. This list holds all the words
-# that are combined together to make up any allowed EC2 property. This is then
-# fed into our "resolver" functionality which spits out the the correct cased
-# property name. As a result, properties must still be spelt correctly, however,
-# any casing combination is allowed.
-LANG: list[str] = [
-    "Arns", "Action", "Assume", "Boundary", "Description", "Document",
-    "Duration", "Effect", "Groups", "Managed", "Max", "Name", "Path",
-    "Permissions", "Policies", "Policy", "Principal", "Resources", "Role",
-    "Roles", "Session", "Sid", "Statement", "Tags", "Users", "Version",
-]
-
-
 # default fields we always want to generate, even if they're empty
 ROLE_DEFAULTS = {"assumerolepolicydocument", "rolename"}
 
@@ -179,6 +163,9 @@ def _handle_statement(statements: list[dict[str, str]]) -> list[Statement]:
     default_statement_props: set[str] = {"action", "effect", "resources"}
     res: list[Statement] = []
 
+    # lang is localised for policy statements
+    lang: list[str] = utils.create_lang(_statement().keys())
+
     for statement in statements:
 
         default_statement: Statement = _statement()
@@ -193,7 +180,7 @@ def _handle_statement(statements: list[dict[str, str]]) -> list[Statement]:
             # clean the incoming key and update the default value to
             # incoming one
             cleaned_prop: str = validators.validate_props(
-                key, value, default_statement, LANG, EXPECTS_LIST)
+                key, value, default_statement, lang, EXPECTS_LIST)
 
             resource_tracker.add(cleaned_prop.lower())
 
@@ -237,6 +224,16 @@ def build(
     # holds the final set of correctly formatted Policy properties
     role: Role = _role_defaults()
 
+    # The nested-ness of policy documents makes this AITA but its still
+    # better to use the auto generated approach and keep in line with the
+    # rest of the code than to be out of lock step
+    lang: list[str] = utils.create_lang(
+        list(role.keys())
+        + list(_statement().keys())
+        + ["Statement"]
+        + ["Version"]
+    )
+
     # Allow users to overwrite any default value but protect against them
     # naming the same value twice in the cnflite file. This is easily done
     # by naming the same property twice but using different casee i.e.
@@ -253,7 +250,7 @@ def build(
             # this function returns a generic ValueError, so we want to catch
             # it here and propagate it with the correct error message.
             cleaned_property_name: str = validators.validate_props(
-                key, value, role, LANG, EXPECTS_LIST)
+                key, value, role, lang, EXPECTS_LIST)
 
         except ValueError as err:
             msg: str = f"'{key}' is an invalid attribute for Roles"
