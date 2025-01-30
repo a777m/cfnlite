@@ -1,0 +1,78 @@
+# name: cfnLiteNaclSimpleExample
+# resources:
+#   networkAcl:
+#     ingress: [https, redis, psql, icmp]
+#     egress: https
+#     tags:
+#       name: microservice NACL
+
+Resources:
+  cfnLiteNaclSimpleExampleNETWORKACL:
+    Properties:
+      Tags:
+        - Key: default-cfnlite-resource-name
+          Value: cfnLiteNaclSimpleExampleNETWORKACL
+        - Key: name
+          Value: microservice NACL
+      VpcId: id-example-vpc
+    Type: AWS::EC2::NetworkAcl
+  cfnLiteNaclSimpleExampleNETWORKACLRuleHTTPSIn:
+    Properties:
+      CidrBlock: '0.0.0.0/0'
+      Egress: false
+      NetworkAclId: !Ref 'cfnLiteNaclSimpleExampleNETWORKACL'
+      PortRange:
+        From: 443
+        To: 443
+      Protocol: 6
+      RuleAction: allow
+      RuleNumber: 443
+    Type: AWS::EC2::NetworkAclEntry
+  cfnLiteNaclSimpleExampleNETWORKACLRuleHTTPSOut:
+    Properties:
+      CidrBlock: '0.0.0.0/0'
+      Egress: true
+      NetworkAclId: !Ref 'cfnLiteNaclSimpleExampleNETWORKACL'
+      PortRange:
+        From: 443
+        To: 443
+      Protocol: 6
+      RuleAction: allow
+      RuleNumber: 443
+    Type: AWS::EC2::NetworkAclEntry
+  cfnLiteNaclSimpleExampleNETWORKACLRuleICMPIn:
+    Properties:
+      CidrBlock: '0.0.0.0/0'
+      Egress: false
+      Icmp:
+        Code: 0
+        Type: 8
+      NetworkAclId: !Ref 'cfnLiteNaclSimpleExampleNETWORKACL'
+      Protocol: 1
+      RuleAction: allow
+      RuleNumber: 100
+    Type: AWS::EC2::NetworkAclEntry
+  cfnLiteNaclSimpleExampleNETWORKACLRulePSQLIn:
+    Properties:
+      CidrBlock: '0.0.0.0/0'
+      Egress: false
+      NetworkAclId: !Ref 'cfnLiteNaclSimpleExampleNETWORKACL'
+      PortRange:
+        From: 5432
+        To: 5432
+      Protocol: 6
+      RuleAction: allow
+      RuleNumber: 5432
+    Type: AWS::EC2::NetworkAclEntry
+  cfnLiteNaclSimpleExampleNETWORKACLRuleREDISIn:
+    Properties:
+      CidrBlock: '0.0.0.0/0'
+      Egress: false
+      NetworkAclId: !Ref 'cfnLiteNaclSimpleExampleNETWORKACL'
+      PortRange:
+        From: 6379
+        To: 6379
+      Protocol: 6
+      RuleAction: allow
+      RuleNumber: 6379
+    Type: AWS::EC2::NetworkAclEntry

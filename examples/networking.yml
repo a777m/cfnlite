@@ -1,0 +1,227 @@
+# name: cfnLiteNetworkingExample
+# resources:
+#   vpc:
+#     cidrBlock: "10.0.0.0/16"
+#   internetGateway:
+#     tags:
+#       env: stage
+#       vpc-id: ref vpc
+#   networkAcl:
+#     ingress: [http, https, icmp, ssh]
+#     egress: [http, https, icmp]
+#     tags:
+#       env: prod
+#   routetable:
+#     dependsOn: ref vpc
+#     vpcId: ref vpc
+#     tags:
+#       env: prod
+#       vpc-id: ref vpc
+#   ec2:
+#     subnetId: ref vpc
+#     tags:
+#       name: bastion host
+#       vpc-id: ref vpc
+#   subnet:
+#     availabilityZone: eu-west-2b
+#     tags:
+#       name: subnet
+#       vpc-id: ref vpc
+#   securitygroups:
+#     GroupDescription: Handle inbound and outbound traffic
+#     securitygroupIngress: [http]
+#     securitygroupEgress: [http]
+#     vpcId: ref vpc
+
+Resources:
+  cfnLiteNetworkingExampleEC2:
+    Properties:
+      ImageId: ami-0b45ae66668865cd6
+      InstanceType: t2.micro
+      SecurityGroups:
+        - default
+      SubnetId: !Ref 'cfnLiteNetworkingExampleVPC'
+      Tags:
+        - Key: default-cfnlite-resource-name
+          Value: cfnLiteNetworkingExampleEC2
+        - Key: name
+          Value: bastion host
+        - Key: vpc-id
+          Value: !Ref 'cfnLiteNetworkingExampleVPC'
+    Type: AWS::EC2::Instance
+  cfnLiteNetworkingExampleINTERNETGATEWAY:
+    Properties:
+      Tags:
+        - Key: default-cfnlite-resource-name
+          Value: cfnLiteNetworkingExampleINTERNETGATEWAY
+        - Key: env
+          Value: stage
+        - Key: vpc-id
+          Value: !Ref 'cfnLiteNetworkingExampleVPC'
+    Type: AWS::EC2::InternetGateway
+  cfnLiteNetworkingExampleINTERNETGATEWAYAttachement:
+    Properties:
+      InternetGatewayId: !Ref 'cfnLiteNetworkingExampleINTERNETGATEWAY'
+      VpcId: !Ref 'cfnLiteNetworkingExampleVPC'
+    Type: AWS::EC2::VPCGatewayAttachment
+  cfnLiteNetworkingExampleNETWORKACL:
+    Properties:
+      Tags:
+        - Key: default-cfnlite-resource-name
+          Value: cfnLiteNetworkingExampleNETWORKACL
+        - Key: env
+          Value: prod
+      VpcId: id-example-vpc
+    Type: AWS::EC2::NetworkAcl
+  cfnLiteNetworkingExampleNETWORKACLRuleHTTPIn:
+    Properties:
+      CidrBlock: '0.0.0.0/0'
+      Egress: false
+      NetworkAclId: !Ref 'cfnLiteNetworkingExampleNETWORKACL'
+      PortRange:
+        From: 80
+        To: 80
+      Protocol: 6
+      RuleAction: allow
+      RuleNumber: 80
+    Type: AWS::EC2::NetworkAclEntry
+  cfnLiteNetworkingExampleNETWORKACLRuleHTTPOut:
+    Properties:
+      CidrBlock: '0.0.0.0/0'
+      Egress: true
+      NetworkAclId: !Ref 'cfnLiteNetworkingExampleNETWORKACL'
+      PortRange:
+        From: 80
+        To: 80
+      Protocol: 6
+      RuleAction: allow
+      RuleNumber: 80
+    Type: AWS::EC2::NetworkAclEntry
+  cfnLiteNetworkingExampleNETWORKACLRuleHTTPSIn:
+    Properties:
+      CidrBlock: '0.0.0.0/0'
+      Egress: false
+      NetworkAclId: !Ref 'cfnLiteNetworkingExampleNETWORKACL'
+      PortRange:
+        From: 443
+        To: 443
+      Protocol: 6
+      RuleAction: allow
+      RuleNumber: 443
+    Type: AWS::EC2::NetworkAclEntry
+  cfnLiteNetworkingExampleNETWORKACLRuleHTTPSOut:
+    Properties:
+      CidrBlock: '0.0.0.0/0'
+      Egress: true
+      NetworkAclId: !Ref 'cfnLiteNetworkingExampleNETWORKACL'
+      PortRange:
+        From: 443
+        To: 443
+      Protocol: 6
+      RuleAction: allow
+      RuleNumber: 443
+    Type: AWS::EC2::NetworkAclEntry
+  cfnLiteNetworkingExampleNETWORKACLRuleICMPIn:
+    Properties:
+      CidrBlock: '0.0.0.0/0'
+      Egress: false
+      Icmp:
+        Code: 0
+        Type: 8
+      NetworkAclId: !Ref 'cfnLiteNetworkingExampleNETWORKACL'
+      Protocol: 1
+      RuleAction: allow
+      RuleNumber: 100
+    Type: AWS::EC2::NetworkAclEntry
+  cfnLiteNetworkingExampleNETWORKACLRuleICMPOut:
+    Properties:
+      CidrBlock: '0.0.0.0/0'
+      Egress: true
+      Icmp:
+        Code: 0
+        Type: 0
+      NetworkAclId: !Ref 'cfnLiteNetworkingExampleNETWORKACL'
+      Protocol: 1
+      RuleAction: allow
+      RuleNumber: 100
+    Type: AWS::EC2::NetworkAclEntry
+  cfnLiteNetworkingExampleNETWORKACLRuleSSHIn:
+    Properties:
+      CidrBlock: '0.0.0.0/0'
+      Egress: false
+      NetworkAclId: !Ref 'cfnLiteNetworkingExampleNETWORKACL'
+      PortRange:
+        From: 22
+        To: 22
+      Protocol: 6
+      RuleAction: allow
+      RuleNumber: 22
+    Type: AWS::EC2::NetworkAclEntry
+  cfnLiteNetworkingExampleROUTETABLE:
+    DependsOn: !Ref 'cfnLiteNetworkingExampleVPC'
+    Properties:
+      Tags:
+        - Key: default-cfnlite-resource-name
+          Value: cfnLiteNetworkingExampleROUTETABLE
+        - Key: env
+          Value: prod
+        - Key: vpc-id
+          Value: !Ref 'cfnLiteNetworkingExampleVPC'
+      VpcId: !Ref 'cfnLiteNetworkingExampleVPC'
+    Type: AWS::EC2::RouteTable
+  cfnLiteNetworkingExampleROUTETABLERouteToIGW:
+    Properties:
+      DestinationCidrBlock: '0.0.0.0/0'
+      GatewayId: !Ref 'cfnLiteNetworkingExampleINTERNETGATEWAY'
+      RouteTableId: !Ref 'cfnLiteNetworkingExampleROUTETABLE'
+    Type: AWS::EC2::Route
+  cfnLiteNetworkingExampleSECURITYGROUPS:
+    Properties:
+      GroupDescription: Handle inbound and outbound traffic
+      SecurityGroupEgress:
+        - Properties:
+            CidrIp: '0.0.0.0/0'
+            Description: Outbound HTTP traffic
+            FromPort: 80
+            GroupId: !GetAtt 'cfnLiteNetworkingExampleSECURITYGROUPS.GroupId'
+            IpProtocol: tcp
+            ToPort: 80
+          Type: AWS::EC2::SecurityGroupEgress
+      SecurityGroupIngress:
+        - Properties:
+            CidrIp: '0.0.0.0/0'
+            Description: Inbound HTTP traffic
+            FromPort: 80
+            GroupId: !GetAtt 'cfnLiteNetworkingExampleSECURITYGROUPS.GroupId'
+            IpProtocol: tcp
+            ToPort: 80
+          Type: AWS::EC2::SecurityGroupIngress
+      VpcId: !Ref 'cfnLiteNetworkingExampleVPC'
+    Type: AWS::EC2::SecurityGroup
+  cfnLiteNetworkingExampleSUBNET:
+    Properties:
+      AvailabilityZone: eu-west-2b
+      CidrBlock: 10.0.1.0/24
+      Tags:
+        - Key: default-cfnlite-resource-name
+          Value: cfnLiteNetworkingExampleSUBNET
+        - Key: name
+          Value: subnet
+        - Key: vpc-id
+          Value: !Ref 'cfnLiteNetworkingExampleVPC'
+      VpcId: fake-vpc-id
+    Type: AWS::EC2::Subnet
+  cfnLiteNetworkingExampleSUBNETSubnetToNACL:
+    Properties:
+      NetworkAclId: !Ref 'cfnLiteNetworkingExampleNETWORKACL'
+      SubnetId: !Ref 'cfnLiteNetworkingExampleSUBNET'
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+  cfnLiteNetworkingExampleSUBNETSubnetToRouteTable:
+    Properties:
+      RouteTableId: !Ref 'cfnLiteNetworkingExampleROUTETABLE'
+      SubnetId: !Ref 'cfnLiteNetworkingExampleSUBNET'
+    Type: AWS::EC2::SubnetRouteTableAssociation
+  cfnLiteNetworkingExampleVPC:
+    Properties:
+      CidrBlock: 10.0.0.0/16
+    Type: AWS::EC2::VPC
