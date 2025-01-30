@@ -1,0 +1,16 @@
+# name: cfnLiteVPCSimpleExample
+# resources:
+#   vpc:
+#     tags:
+#       name: micro-service-vpc
+
+Resources:
+  cfnLiteVPCSimpleExampleVPC:
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      Tags:
+        - Key: default-cfnlite-resource-name
+          Value: cfnLiteVPCSimpleExampleVPC
+        - Key: name
+          Value: micro-service-vpc
+    Type: AWS::EC2::VPC

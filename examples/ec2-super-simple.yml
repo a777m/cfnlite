@@ -1,0 +1,19 @@
+# name: cfnLiteEC2SuperSimpleExample
+# resources:
+#   ec2:
+#     tags:
+#       name: bastion-host
+
+Resources:
+  cfnLiteEC2SuperSimpleExampleEC2:
+    Properties:
+      ImageId: ami-0b45ae66668865cd6
+      InstanceType: t2.micro
+      SecurityGroups:
+        - default
+      Tags:
+        - Key: default-cfnlite-resource-name
+          Value: cfnLiteEC2SuperSimpleExampleEC2
+        - Key: name
+          Value: bastion-host
+    Type: AWS::EC2::Instance

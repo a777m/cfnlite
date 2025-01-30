@@ -1,0 +1,32 @@
+# name: cfnLiteVpcConnectIgwSimpleExample
+# resources:
+#   vpc:
+#     tags:
+#       name: microservice vpc
+#   internetGateway:
+#     tags:
+#       name: public gatway
+
+Resources:
+  cfnLiteVpcConnectIgwSimpleExampleINTERNETGATEWAY:
+    Properties:
+      Tags:
+        - Key: default-cfnlite-resource-name
+          Value: cfnLiteVpcConnectIgwSimpleExampleINTERNETGATEWAY
+        - Key: name
+          Value: public gatway
+    Type: AWS::EC2::InternetGateway
+  cfnLiteVpcConnectIgwSimpleExampleINTERNETGATEWAYAttachement:
+    Properties:
+      InternetGatewayId: !Ref 'cfnLiteVpcConnectIgwSimpleExampleINTERNETGATEWAY'
+      VpcId: !Ref 'cfnLiteVpcConnectIgwSimpleExampleVPC'
+    Type: AWS::EC2::VPCGatewayAttachment
+  cfnLiteVpcConnectIgwSimpleExampleVPC:
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      Tags:
+        - Key: default-cfnlite-resource-name
+          Value: cfnLiteVpcConnectIgwSimpleExampleVPC
+        - Key: name
+          Value: microservice vpc
+    Type: AWS::EC2::VPC
