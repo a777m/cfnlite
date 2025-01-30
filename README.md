@@ -21,7 +21,7 @@ free as possible by simplifying the property semantics and offering sensible
 defaults. A core tennet of cnflite is to not try produce perfect CFN but rather
 generate good-enough CFN as simply and quickly as possible.
 
-[More Examples](https://github.com/a777m/cfnlite/blob/main/examples.md)
+[More Examples](examples.md)
 
 #### Why (and why not just use CDK)?
 YAML is language agnostic and its declarative nature makes it relatively easy
