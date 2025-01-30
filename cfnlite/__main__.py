@@ -38,9 +38,14 @@ SYMBOL_TABLE: dict[str, object | None] = {}
 # - `explain` prints out the properties we support for each resource.
 DISPATCH: dict[str, Callable] = {
     "ec2": cfnlite.ec2,
+    "internetgateway": cfnlite.internet_gateway,
+    "networkacl": cfnlite.networkacl,
     "policy": cfnlite.policy,
     "role": cfnlite.role,
+    "routetable": cfnlite.route_table,
     "securitygroups": cfnlite.securitygroups,
+    "subnet": cfnlite.subnet,
+    "vpc": cfnlite.vpc,
 }
 
 # global CloudFormation template, contains what will eventually be generated
