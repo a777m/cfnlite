@@ -18,21 +18,26 @@ run `cfnlite --explain <resource-name>`
 <a name="ec2"></a>
 #### EC2
 ```yaml
-name: cfnLiteEc2Example
+name: cfnLiteEC2SuperSimpleExample
 resources:
   ec2:
-    securityGroups:
-      - default
+    tags:
+      name: bastion-host
 ```
 The above example generates the following
 ```yaml
 Resources:
-  cfnLiteEc2ExampleEC2:
+  cfnLiteEC2SuperSimpleExampleEC2:
     Properties:
       ImageId: ami-0b45ae66668865cd6
       InstanceType: t2.micro
       SecurityGroups:
         - default
+      Tags:
+        - Key: default-cfnlite-resource-name
+          Value: cfnLiteEC2SuperSimpleExampleEC2
+        - Key: name
+          Value: bastion-host
     Type: AWS::EC2::Instance
 ```
 Of the cnflite supported AWS resources, this is probably the simplest example.
@@ -40,7 +45,9 @@ Each resource comes with defaults for all the required fields so you don't need
 pass more property values than needed.
 
 Some things to note:
-- for each resource you do need to pass at least on property.
+- for each resource you do need to pass at least on property, the simples of
+which is probably a single tag - tags are available for all top level
+resources supported by cfnlite.
 - cfnlite requires a name field, this is used as part of giving resources
 unique names
 - you can overwrite any of the supported properties
