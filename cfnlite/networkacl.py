@@ -338,4 +338,7 @@ def explain():
     import pprint  # pylint: disable=import-outside-toplevel
 
     # we can use the typed dict to get this data
-    pprint.pprint(get_type_hints(NetworkAcl))
+    base: dict = get_type_hints(NetworkAcl)
+    # add ingress and egress options
+    base.update({"egress": list[str], "ingress": list[str]})
+    pprint.pprint(base)

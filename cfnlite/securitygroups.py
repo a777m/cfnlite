@@ -260,4 +260,9 @@ def explain():
     import pprint  # pylint: disable=import-outside-toplevel
 
     # we can use the typed dict to get this data
-    pprint.pprint(get_type_hints(SecurityGroup))
+    base: dict = get_type_hints(SecurityGroup)
+    # we have custom options for ingress/egress, so this needs to be reflected
+    # in the output
+    base["SecurityGroupEgress"] = list[str]
+    base["SecurityGroupIngress"] = list[str]
+    pprint.pprint(base)
