@@ -60,7 +60,7 @@ venv/bin/python -m pip install -r requirements.txt
 venv/bin/python -m cnflite --help
 
 #to run cfnlite on a file
-venv/bin/python -m cfnlite <path-to-file> --dry-run
+venv/bin/python -m cfnlite --in-file <path-to-file> --dry-run
 ```
 cnflite supports python 3.10+
 
