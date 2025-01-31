@@ -215,12 +215,15 @@ def main(args: argparse.Namespace) -> int:
         raise ValueError(
             "Either print to console or write to a file, not both.")
 
-    if not args.file.exists():
+    if not args.in_file:
+        raise ValueError("Expected an input file, found none.")
+
+    if not args.in_file.exists():
         raise ValueError(f"File at path not found: {args.file}")
 
     # optimistically attempt to parse file, if there are exceptions
     # they will be handled higher up the stack
-    parse(args.file)
+    parse(args.in_file)
 
     if args.dry_run:
         print(TEMPLATE.to_yaml())
@@ -241,7 +244,7 @@ def cli() -> argparse.Namespace:
         prog="cfnlite", description="cfnlite CloudFormation generator")
 
     parser.add_argument(
-        "file",
+        "--in-file",
         type=pathlib.Path,
         help="A YAML cfnlite file",
     )
