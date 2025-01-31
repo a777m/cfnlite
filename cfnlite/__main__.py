@@ -197,13 +197,6 @@ def main(args: argparse.Namespace) -> int:
     :returns: 0 if successfully parsed else 1
     :rtype: int
     """
-    if args.output_file and args.dry_run:
-        raise ValueError(
-            "Either print to console or write to a file, not both.")
-
-    if not args.file.exists():
-        raise ValueError(f"File at path not found: {args.file}")
-
     if args.explain:
         if args.explain.lower() == "resources":
             DISPATCH.keys()
@@ -215,6 +208,13 @@ def main(args: argparse.Namespace) -> int:
             raise ValueError(f"'{args.explain}' is not a valid resource type.")
 
         return 0
+
+    if args.output_file and args.dry_run:
+        raise ValueError(
+            "Either print to console or write to a file, not both.")
+
+    if not args.file.exists():
+        raise ValueError(f"File at path not found: {args.file}")
 
     # optimistically attempt to parse file, if there are exceptions
     # they will be handled higher up the stack
