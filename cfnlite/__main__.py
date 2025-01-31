@@ -199,7 +199,9 @@ def main(args: argparse.Namespace) -> int:
     """
     if args.explain:
         if args.explain.lower() == "resources":
-            DISPATCH.keys()
+            print("-------- CFNLite supported resources ---------")
+            for resource, _ in DISPATCH.items():
+                print(resource)
 
         elif args.explain.lower() in DISPATCH:
             DISPATCH[args.explain.lower()].explain()
