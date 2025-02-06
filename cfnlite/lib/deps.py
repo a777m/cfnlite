@@ -40,10 +40,10 @@ def deps(
     # helps us find cycles
     path.add(name)
     for value in resources[name].values():
-        if not isinstance(value, str) or "ref" not in value:
+        if not isinstance(value, str) or "ref" not in value.strip().lower():
             continue
 
-        value: list[str] = value.split()
+        value: list[str] = value.strip().split()
 
         if len(value) < 2 or len(value) > 2:
             raise ValueError(

@@ -53,6 +53,40 @@ def test_dep_tree__simple_ref():
     assert actual == expected_graph
 
 
+def test_dep_tree__simple_ref_space_before_ref():
+    graph = _graph()
+    # add some simple deps
+    graph["ec2"]["SecurityGroups"] = ' ref securitygroups'
+    graph["s3"]["SecurityGroups"] = ' ref ec2'
+
+    actual = deps.dep_graph(graph)
+
+    expected_graph = {
+        "ec2": ["securitygroups"],
+        "securitygroups": [],
+        "s3": ["ec2"],
+    }
+
+    assert actual == expected_graph
+
+
+def test_dep_tree__simple_ref_upper_case():
+    graph = _graph()
+    # add some simple deps
+    graph["ec2"]["SecurityGroups"] = 'Ref securitygroups'
+    graph["s3"]["SecurityGroups"] = 'Ref ec2'
+
+    actual = deps.dep_graph(graph)
+
+    expected_graph = {
+        "ec2": ["securitygroups"],
+        "securitygroups": [],
+        "s3": ["ec2"],
+    }
+
+    assert actual == expected_graph
+
+
 def test_dep_tree__self_ref():
     graph = _graph()
     # add some simple deps
