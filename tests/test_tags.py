@@ -57,7 +57,7 @@ def test_tags__with_refs():
     input_tags = {
         "tag1": "value1",
         "tag2": "value2",
-        "sg": "ref securitygroups"
+        "sg": "ref! securitygroups"
     }
 
     expected = [

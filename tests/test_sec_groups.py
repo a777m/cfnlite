@@ -388,7 +388,7 @@ def test_sg_build__reference_support():
     # simplify the output
     sg["resources"]["securitygroups"]["securitygroupingress"] = []
     sg["resources"]["securitygroups"]["securitygroupegress"] = []
-    sg["resources"]["securitygroups"]["vpcId"] = "ref vpc"
+    sg["resources"]["securitygroups"]["vpcId"] = "ref! vpc"
 
     # create vpc resource and add it to symbol table
     vpc = troposphere.ec2.VPC("testVPC", CidrBlock="10.0.0.0/16")

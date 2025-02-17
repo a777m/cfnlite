@@ -6,7 +6,7 @@ CFNLite is a 0 to 1 CloudFormation template generater built on YAML
 name: cfnLiteEc2Example
 resources:
   ec2:
-    dependson: ref securitygroups
+    dependson: ref! securitygroups
     securityGroups:
       - ref securitygroups
       - default

@@ -40,14 +40,17 @@ def deps(
     # helps us find cycles
     path.add(name)
     for value in resources[name].values():
-        if not isinstance(value, str) or "ref" not in value.strip().lower():
+        if (
+            not isinstance(value, str)
+            or not value.strip().lower().startswith("ref!")
+        ):
             continue
 
         value: list[str] = value.strip().split()
 
         if len(value) < 2 or len(value) > 2:
             raise ValueError(
-                "Keyword 'ref' must be followed by exactly one argument")
+                "Keyword 'ref!' must be followed by exactly one argument")
 
         # grab the resource being referenced
         dep: str = value[1]

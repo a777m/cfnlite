@@ -5,33 +5,33 @@
 #   internetGateway:
 #     tags:
 #       env: stage
-#       vpc-id: ref vpc
+#       vpc-id: ref! vpc
 #   networkAcl:
 #     ingress: [http, https, icmp, ssh]
 #     egress: [http, https, icmp]
 #     tags:
 #       env: prod
 #   routetable:
-#     dependsOn: ref vpc
-#     vpcId: ref vpc
+#     dependsOn: ref! vpc
+#     vpcId: ref! vpc
 #     tags:
 #       env: prod
-#       vpc-id: ref vpc
+#       vpc-id: ref! vpc
 #   ec2:
-#     subnetId: ref vpc
+#     subnetId: ref! vpc
 #     tags:
 #       name: bastion host
-#       vpc-id: ref vpc
+#       vpc-id: ref! vpc
 #   subnet:
 #     availabilityZone: eu-west-2b
 #     tags:
 #       name: subnet
-#       vpc-id: ref vpc
+#       vpc-id: ref! vpc
 #   securitygroups:
 #     GroupDescription: Handle inbound and outbound traffic
 #     securitygroupIngress: [http]
 #     securitygroupEgress: [http]
-#     vpcId: ref vpc
+#     vpcId: ref! vpc
 
 Resources:
   cfnLiteNetworkingExampleEC2:

@@ -2,7 +2,7 @@
 # resources:
 #   ec2:
 #     instanceType: t2.micro
-#     securityGroups: ref securitygroups
+#     securityGroups: ref! securitygroups
 #   securitygroups:
 #     GroupDescription: Handle inbound and outbound traffic
 #     securitygroupIngress: [http]

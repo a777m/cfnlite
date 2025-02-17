@@ -48,7 +48,7 @@ def _check_list_for_refs(
     :rtype: list[str, troposphere.Ref]
     """
     for idx, item in enumerate(prop_list):
-        if isinstance(item, str) and item.strip().startswith("ref"):
+        if isinstance(item, str) and item.strip().lower().startswith("ref!"):
             prop_list[idx] = _handle_refs(item, callback)
 
     return prop_list
@@ -80,7 +80,7 @@ def resolve_refs(
         handled_refs = _check_list_for_refs(value, callback)
         utils.nested_update(props, prop_name, handled_refs)
 
-    elif (isinstance(value, str) and value.strip().startswith("ref")):
+    elif (isinstance(value, str) and value.strip().lower().startswith("ref!")):
         handled_refs = _handle_refs(value, callback)
         utils.nested_update(props, prop_name, handled_refs)
 

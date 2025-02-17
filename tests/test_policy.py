@@ -252,7 +252,7 @@ def test_policy_build__with_reference():
     callbacks["add_symbol"]("role", role)
 
     # add principal and sid
-    policy["resources"]["policy"]["roles"] = "ref role"
+    policy["resources"]["policy"]["roles"] = "ref! role"
 
     cfnlite.policy.build("testPolicy", callbacks, policy["resources"]["policy"])
 
