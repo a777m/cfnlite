@@ -22,7 +22,7 @@ def add_tags(
     new_tags_mapping: dict[str, str] = {"default-cfnlite-resource-name": name}
 
     for key, value in tags.items():
-        if (isinstance(value, str) and value.strip().startswith("ref")):
+        if (isinstance(value, str) and value.strip().startswith("ref!")):
             # pylint: disable=protected-access
             # The reason we do this protected access to is prevent circular
             # dependencies if we put this function in utils (validators also

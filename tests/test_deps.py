@@ -39,8 +39,8 @@ def test_dep_tree__no_deps():
 def test_dep_tree__simple_ref():
     graph = _graph()
     # add some simple deps
-    graph["ec2"]["SecurityGroups"] = 'ref securitygroups'
-    graph["s3"]["SecurityGroups"] = 'ref ec2'
+    graph["ec2"]["SecurityGroups"] = 'ref! securitygroups'
+    graph["s3"]["SecurityGroups"] = 'ref! ec2'
 
     actual = deps.dep_graph(graph)
 
@@ -56,8 +56,8 @@ def test_dep_tree__simple_ref():
 def test_dep_tree__simple_ref_space_before_ref():
     graph = _graph()
     # add some simple deps
-    graph["ec2"]["SecurityGroups"] = ' ref securitygroups'
-    graph["s3"]["SecurityGroups"] = ' ref ec2'
+    graph["ec2"]["SecurityGroups"] = ' ref! securitygroups'
+    graph["s3"]["SecurityGroups"] = ' ref! ec2'
 
     actual = deps.dep_graph(graph)
 
@@ -73,8 +73,8 @@ def test_dep_tree__simple_ref_space_before_ref():
 def test_dep_tree__simple_ref_upper_case():
     graph = _graph()
     # add some simple deps
-    graph["ec2"]["SecurityGroups"] = 'Ref securitygroups'
-    graph["s3"]["SecurityGroups"] = 'Ref ec2'
+    graph["ec2"]["SecurityGroups"] = 'Ref! securitygroups'
+    graph["s3"]["SecurityGroups"] = 'Ref! ec2'
 
     actual = deps.dep_graph(graph)
 
@@ -90,8 +90,8 @@ def test_dep_tree__simple_ref_upper_case():
 def test_dep_tree__self_ref():
     graph = _graph()
     # add some simple deps
-    graph["ec2"]["SecurityGroups"] = 'ref ec2'
-    graph["s3"]["SecurityGroups"] = 'ref ec2'
+    graph["ec2"]["SecurityGroups"] = 'ref! ec2'
+    graph["s3"]["SecurityGroups"] = 'ref! ec2'
 
     with pytest.raises(ValueError):
         deps.dep_graph(graph)
@@ -100,8 +100,8 @@ def test_dep_tree__self_ref():
 def test_dep_tree__nothing_after_ref():
     graph = _graph()
     # add some simple deps
-    graph["ec2"]["SecurityGroups"] = 'ref'
-    graph["s3"]["SecurityGroups"] = 'ref ec2'
+    graph["ec2"]["SecurityGroups"] = 'ref!'
+    graph["s3"]["SecurityGroups"] = 'ref! ec2'
 
     with pytest.raises(ValueError):
         deps.dep_graph(graph)
@@ -110,7 +110,7 @@ def test_dep_tree__nothing_after_ref():
 def test_dep_tree__too_many_values_after_ref():
     graph = _graph()
     # add some simple deps
-    graph["ec2"]["SecurityGroups"] = 'ref ec2 securitygroups'
+    graph["ec2"]["SecurityGroups"] = 'ref! ec2 securitygroups'
 
     with pytest.raises(ValueError):
         deps.dep_graph(graph)
@@ -119,7 +119,7 @@ def test_dep_tree__too_many_values_after_ref():
 def test_dep_tree__ref_pointing_undefined_resource():
     graph = _graph()
     # add some simple deps
-    graph["ec2"]["SecurityGroups"] = 'ref ec3'
+    graph["ec2"]["SecurityGroups"] = 'ref! ec3'
 
     with pytest.raises(ValueError) as err_msg:
         deps.dep_graph(graph)
@@ -130,9 +130,9 @@ def test_dep_tree__ref_pointing_undefined_resource():
 def test_dep_tree__has_cycle():
     graph = _graph()
     # add some a simple cycle
-    graph["ec2"]["SecurityGroups"] = 'ref securitygroups'
-    graph["ec2"]["AnotherOne"] = 'ref s3'
-    graph["s3"]["SecurityGroups"] = 'ref ec2'
+    graph["ec2"]["SecurityGroups"] = 'ref! securitygroups'
+    graph["ec2"]["AnotherOne"] = 'ref! s3'
+    graph["s3"]["SecurityGroups"] = 'ref! ec2'
 
     with pytest.raises(ValueError):
         actual = deps.dep_graph(graph)
@@ -153,8 +153,8 @@ def test_top_sort__no_deps():
 def test_top_sort__simple_deps():
     graph = _graph()
     # add some simple deps
-    graph["ec2"]["SecurityGroups"] = 'ref securitygroups'
-    graph["s3"]["SecurityGroups"] = 'ref ec2'
+    graph["ec2"]["SecurityGroups"] = 'ref! securitygroups'
+    graph["s3"]["SecurityGroups"] = 'ref! ec2'
 
     graph = deps.dep_graph(graph)
 
@@ -189,10 +189,10 @@ def test_deps__end_to_end():
       ec2:
         InstanceType: t2.micro
         ImageId: ami-0b45ae66668865cd6
-        SecurityGroups: ref securitygroups
+        SecurityGroups: ref! securitygroups
       s3:
         BucketName: item
-        SecurityGroups: ref ec2
+        SecurityGroups: ref! ec2
         with:
           - name1
           - name2

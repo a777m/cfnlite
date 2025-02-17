@@ -1,9 +1,9 @@
 # name: cfnLiteDepsOnExample
 # resources:
 #   ec2:
-#     dependsOn: ref securitygroups
+#     dependsOn: ref! securitygroups
 #     instanceType: t2.micro
-#     securityGroups: ref securitygroups
+#     securityGroups: ref! securitygroups
 #   securitygroups:
 #     GroupDescription: Handle inbound and outbound traffic
 #     securitygroupIngress: [http]

@@ -117,7 +117,7 @@ def test_ec2_build__with_reference_but_not_as_list():
     callbacks["add_symbol"]("securitygroups", sg)
 
     # update security groups reference
-    ec2["resources"]["ec2"]["SecurityGroups"] = "ref securitygroups"
+    ec2["resources"]["ec2"]["SecurityGroups"] = "ref! securitygroups"
 
     cfnlite.ec2.build("testEC2", callbacks, ec2["resources"]["ec2"])
 
@@ -157,7 +157,7 @@ def test_ec2_build__with_reference_as_list():
     callbacks["add_symbol"]("securitygroups", sg)
 
     # update security groups reference
-    ec2["resources"]["ec2"]["SecurityGroups"] = ["ref securitygroups"]
+    ec2["resources"]["ec2"]["SecurityGroups"] = ["ref! securitygroups"]
 
     cfnlite.ec2.build("testEC2", callbacks, ec2["resources"]["ec2"])
 
@@ -185,7 +185,7 @@ def test_ec2_build__with_reference_as_list():
 
 # we want to test ref keywords with nothing after and with lots of stuff
 # after them
-@pytest.mark.parametrize("bad_ref", ["ref", "ref abc def", "ref abc def hij"])
+@pytest.mark.parametrize("bad_ref", ["ref!", "ref! abc def", "ref! abc def hij"])
 def test_ec2_build__bad_ref(bad_ref):
     template = troposphere.Template()
     callbacks = mock_callbacks(template)
@@ -198,7 +198,7 @@ def test_ec2_build__bad_ref(bad_ref):
         cfnlite.ec2.build("testEC2", callbacks, ec2["resources"]["ec2"])
 
 
-@pytest.mark.parametrize("bad_ref", ["ref", "ref abc def", "ref abc def hij"])
+@pytest.mark.parametrize("bad_ref", ["ref!", "ref! abc def", "ref! abc def hij"])
 def test_ec2_build__bad_ref_with_as_list(bad_ref):
     template = troposphere.Template()
     callbacks = mock_callbacks(template)
@@ -217,7 +217,7 @@ def test_ec2_build__bad_ref_does_not_exist():
     ec2 = _ec2()
 
     # add ref keyword with nothing following
-    ec2["resources"]["ec2"]["SecurityGroups"] = ["ref fake-ref"]
+    ec2["resources"]["ec2"]["SecurityGroups"] = ["ref! fake-ref"]
 
     with pytest.raises(KeyError):
         cfnlite.ec2.build("testEC2", callbacks, ec2["resources"]["ec2"])
@@ -232,7 +232,7 @@ def test_ec2_build__from_raw_e2e_with_ref():
         imageid: ami-0b45ae66668865cd6
         SecurityGroups:
           - default
-          - ref securitygroups
+          - ref! securitygroups
     """
     yaml=YAML()
     template = troposphere.Template()

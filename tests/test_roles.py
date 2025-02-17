@@ -395,7 +395,7 @@ def test_role_build__reference():
     callbacks["add_symbol"]("securitygroups", sg)
 
     # update role to depend on security group
-    role["resources"]["role"]["dependsOn"] = "ref securitygroups"
+    role["resources"]["role"]["dependsOn"] = "ref! securitygroups"
 
     cfnlite.role.build("testRole", callbacks, role["resources"]["role"])
 

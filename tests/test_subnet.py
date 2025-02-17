@@ -106,7 +106,7 @@ def test_subnet_build__reference():
     callbacks["add_symbol"]("vpc", vpc)
 
     # add reference
-    subnet["resources"]["subnet"]["vpcid"] = "ref vpc"
+    subnet["resources"]["subnet"]["vpcid"] = "ref! vpc"
 
     cfnlite.subnet.build("testSubnet", callbacks, subnet["resources"]["subnet"])
 

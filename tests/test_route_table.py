@@ -102,7 +102,7 @@ def test_routetable_build__reference():
     callbacks["add_symbol"]("vpc", vpc)
 
     # add reference
-    routetable["resources"]["routetable"]["vpcId"] = "ref vpc"
+    routetable["resources"]["routetable"]["vpcId"] = "ref! vpc"
 
     cfnlite.route_table.build("testRouteTable", callbacks, routetable["resources"]["routetable"])
 

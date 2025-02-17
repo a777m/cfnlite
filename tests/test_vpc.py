@@ -107,7 +107,7 @@ def test_vpc_build__references():
     callbacks["add_symbol"]("securitygroups", sg)
 
     # add ref
-    vpc["resources"]["vpc"]["dependsOn"] = "ref securitygroups"
+    vpc["resources"]["vpc"]["dependsOn"] = "ref! securitygroups"
 
     cfnlite.vpc.build("testVPC", callbacks, vpc["resources"]["vpc"])
 
