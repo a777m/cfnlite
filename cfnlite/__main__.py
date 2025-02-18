@@ -167,7 +167,7 @@ def parse(cfnlite_file: pathlib.Path):
     yaml = YAML()
     doc: dict[str, Any] = yaml.load(cfnlite_file)
 
-    if not doc["name"]:
+    if not doc.get("name"):
         raise ValueError("A CNFLite file must have a name field")
 
     # init symbol table
